@@ -25,7 +25,7 @@ export default async function WorkspaceLayout({
   });
 
   if (!user) {
-    redirect("/login");
+    redirect("/api/auth/logout?next=/login");
   }
 
   return <AppShell user={user}>{children}</AppShell>;

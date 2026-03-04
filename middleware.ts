@@ -6,7 +6,11 @@ import {
 } from "@/shared/lib/auth/session";
 
 const PUBLIC_PATHS = ["/login", "/register"];
-const PUBLIC_API_PATHS = ["/api/auth/login", "/api/auth/register"];
+const PUBLIC_API_PATHS = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+];
 const MANAGER_ONLY_PATHS = ["/dashboard", "/api/dashboard"];
 
 function isPublicPath(pathname: string) {

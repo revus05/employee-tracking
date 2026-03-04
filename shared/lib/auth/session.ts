@@ -2,7 +2,6 @@ import type { Role } from "@prisma/client";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import { env } from "@/shared/config/env";
 
 export const SESSION_COOKIE_NAME = "taskboard_session";
 
@@ -13,13 +12,23 @@ export type SessionPayload = {
   username: string;
 };
 
-const secret = new TextEncoder().encode(env.JWT_SECRET);
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_EXPIRES_IN_SECONDS = process.env.JWT_EXPIRES_IN_SECONDS as string;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing");
+}
+if (!JWT_EXPIRES_IN_SECONDS) {
+  throw new Error("JWT_EXPIRES_IN_SECONDS is missing");
+}
+
+const secret = new TextEncoder().encode(JWT_SECRET);
 
 export async function signSessionToken(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(`${env.JWT_EXPIRES_IN_SECONDS}s`)
+    .setExpirationTime(`${JWT_EXPIRES_IN_SECONDS}s`)
     .sign(secret);
 }
 
@@ -66,7 +75,7 @@ export async function setSessionCookie(token: string) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: env.JWT_EXPIRES_IN_SECONDS,
+    maxAge: +JWT_EXPIRES_IN_SECONDS || 0,
   });
 }
 

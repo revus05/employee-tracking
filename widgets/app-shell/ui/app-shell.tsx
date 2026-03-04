@@ -59,7 +59,7 @@ export function AppShell({ user, children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.95_0.02_255/0.35),transparent)] dark:bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.45_0.04_260/0.25),transparent)]">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-400 items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -104,9 +104,7 @@ export function AppShell({ user, children }: AppShellProps) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
-        {children}
-      </main>
+      <main className="mx-auto max-w-400 p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );
 }
