@@ -57,7 +57,7 @@ export function AppShell({ user, children }: AppShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.95_0.02_255/0.35),transparent)] dark:bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.45_0.04_260/0.25),transparent)]">
+    <div className="min-h-screen bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.84_0.03_154/0.22),transparent)] dark:bg-[radial-gradient(85%_120%_at_50%_-10%,oklch(0.52_0.045_154/0.16),transparent)]">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-400 items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
