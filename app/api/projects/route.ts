@@ -76,9 +76,14 @@ export async function POST(request: NextRequest) {
       columns: {
         createMany: {
           data: [
-            { name: "Backlog", order: 0, color: "slate" },
-            { name: "In Progress", order: 1, color: "amber" },
-            { name: "Done", order: 2, color: "emerald" },
+            { name: "Backlog", order: 0, color: "slate", isCompleted: false },
+            {
+              name: "In Progress",
+              order: 1,
+              color: "amber",
+              isCompleted: false,
+            },
+            { name: "Done", order: 2, color: "emerald", isCompleted: true },
           ],
         },
       },

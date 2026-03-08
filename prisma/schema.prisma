@@ -62,6 +62,7 @@ model Column {
   projectId String
   name      String
   color     String   @default("slate")
+  isCompleted Boolean @default(false)
   order     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

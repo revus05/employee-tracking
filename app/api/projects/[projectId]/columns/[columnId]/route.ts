@@ -55,6 +55,7 @@ export async function PATCH(
     data: {
       name: parsed.data.name ?? column.name,
       color: parsed.data.color ?? column.color,
+      isCompleted: parsed.data.isCompleted ?? column.isCompleted,
     },
   });
 
@@ -63,6 +64,7 @@ export async function PATCH(
       id: updated.id,
       name: updated.name,
       color: updated.color,
+      isCompleted: updated.isCompleted,
       order: updated.order,
     },
   });

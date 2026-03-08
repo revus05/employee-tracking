@@ -4,8 +4,6 @@ import { requireApiSession } from "@/shared/lib/auth/guards";
 import { jsonError, jsonOk } from "@/shared/lib/http";
 import { prisma } from "@/shared/lib/prisma";
 
-const donePattern = /(done|готов|closed|resolved)/i;
-
 export async function GET(request: NextRequest) {
   const auth = await requireApiSession(request);
   if ("error" in auth) {
@@ -34,6 +32,7 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           name: true,
+          isCompleted: true,
         },
       },
       tasks: {
@@ -55,7 +54,12 @@ export async function GET(request: NextRequest) {
 
   const tasks = projects.flatMap((project) => project.tasks);
   const columns = projects.flatMap((project) => project.columns);
-  const columnsMap = new Map(columns.map((column) => [column.id, column.name]));
+  const columnsMap = new Map(
+    columns.map((column) => [
+      column.id,
+      { name: column.name, isCompleted: column.isCompleted },
+    ]),
+  );
 
   const now = new Date();
   const next24h = addHours(now, 24);
@@ -71,8 +75,8 @@ export async function GET(request: NextRequest) {
       return false;
     }
 
-    const columnName = columnsMap.get(task.columnId) || "";
-    return isBefore(task.deadline, now) && !donePattern.test(columnName);
+    const column = columnsMap.get(task.columnId);
+    return isBefore(task.deadline, now) && !column?.isCompleted;
   });
 
   const burning = tasks.filter((task) => {
@@ -80,11 +84,11 @@ export async function GET(request: NextRequest) {
       return false;
     }
 
-    const columnName = columnsMap.get(task.columnId) || "";
+    const column = columnsMap.get(task.columnId);
     return (
       isAfter(task.deadline, now) &&
       isBefore(task.deadline, next24h) &&
-      !donePattern.test(columnName)
+      !column?.isCompleted
     );
   });
 
@@ -107,8 +111,8 @@ export async function GET(request: NextRequest) {
       existing.count += 1;
       assigneeDistributionMap.set(task.assignee.id, existing);
 
-      const columnName = columnsMap.get(task.columnId) || "";
-      if (donePattern.test(columnName)) {
+      const column = columnsMap.get(task.columnId);
+      if (column?.isCompleted) {
         const leader = leaderboardMap.get(task.assignee.id) ?? {
           assigneeId: task.assignee.id,
           name: task.assignee.username,

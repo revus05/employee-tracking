@@ -145,6 +145,7 @@ type ColumnEditPopoverProps = {
     columnId: string;
     name: string;
     color: ColumnColor;
+    isCompleted: boolean;
   }) => Promise<void>;
   onDeleteRequest: (column: BoardColumn) => void;
 };
@@ -159,6 +160,7 @@ function ColumnEditPopover({
   const [color, setColor] = React.useState<ColumnColor>(
     (column.color as ColumnColor) ?? "slate",
   );
+  const [isCompleted, setIsCompleted] = React.useState(column.isCompleted);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -166,14 +168,16 @@ function ColumnEditPopover({
     if (open) {
       setName(column.name);
       setColor((column.color as ColumnColor) ?? "slate");
+      setIsCompleted(column.isCompleted);
       setError(null);
     }
-  }, [column.color, column.name, open]);
+  }, [column.color, column.isCompleted, column.name, open]);
 
   async function handleSave() {
     const parsed = createColumnSchema.safeParse({
       name,
       color,
+      isCompleted,
     });
 
     if (!parsed.success) {
@@ -191,6 +195,7 @@ function ColumnEditPopover({
         columnId: column.id,
         name: parsed.data.name,
         color: parsed.data.color as ColumnColor,
+        isCompleted: parsed.data.isCompleted ?? false,
       });
       setOpen(false);
     } catch (err) {
@@ -243,6 +248,16 @@ function ColumnEditPopover({
             ))}
           </div>
         </div>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={isCompleted}
+            onChange={(event) => setIsCompleted(event.target.checked)}
+            className="size-4"
+          />
+          Колонка выполненных задач
+        </label>
 
         {error && <p className="text-xs text-destructive">{error}</p>}
 
@@ -313,6 +328,7 @@ type SortableColumnProps = {
     columnId: string;
     name: string;
     color: ColumnColor;
+    isCompleted: boolean;
   }) => Promise<void>;
   onDeleteColumn: (column: BoardColumn) => void;
 };
@@ -402,7 +418,12 @@ function SortableColumn({
             )}
 
             {column.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} onEdit={onOpenEditTask} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                hideDeadline={column.isCompleted}
+                onEdit={onOpenEditTask}
+              />
             ))}
           </div>
         </ColumnDropArea>
@@ -474,6 +495,9 @@ export function KanbanBoard({
   );
 
   const activeTask = activeTaskId ? findTask(columns, activeTaskId) : null;
+  const activeTaskColumn = activeTask
+    ? columns.find((column) => column.id === activeTask.columnId)
+    : null;
 
   async function handleCreateColumn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -514,6 +538,7 @@ export function KanbanBoard({
     columnId: string;
     name: string;
     color: ColumnColor;
+    isCompleted: boolean;
   }) {
     const column = columns.find((item) => item.id === input.columnId);
     if (!column) {
@@ -521,12 +546,19 @@ export function KanbanBoard({
     }
 
     const response = await apiClient<{
-      column: { id: string; name: string; color: string; order: number };
+      column: {
+        id: string;
+        name: string;
+        color: string;
+        isCompleted: boolean;
+        order: number;
+      };
     }>(`/api/projects/${projectId}/columns/${input.columnId}`, {
       method: "PATCH",
       body: JSON.stringify({
         name: input.name,
         color: input.color,
+        isCompleted: input.isCompleted,
       }),
     });
 
@@ -811,7 +843,12 @@ export function KanbanBoard({
         </SortableContext>
 
         <DragOverlay dropAnimation={null}>
-          {activeTask ? <TaskCardPreview task={activeTask} /> : null}
+          {activeTask ? (
+            <TaskCardPreview
+              task={activeTask}
+              hideDeadline={Boolean(activeTaskColumn?.isCompleted)}
+            />
+          ) : null}
         </DragOverlay>
       </DndContext>
 
@@ -825,6 +862,7 @@ export function KanbanBoard({
         columns={columns.map((column) => ({
           id: column.id,
           name: column.name,
+          isCompleted: column.isCompleted,
         }))}
         defaultColumnId={activeColumnId}
         open={taskDialogOpen}

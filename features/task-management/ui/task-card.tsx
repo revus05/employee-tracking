@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 type BaseTaskCardProps = {
   task: BoardTask;
+  hideDeadline?: boolean;
 };
 
 type TaskCardProps = BaseTaskCardProps & {
@@ -22,6 +23,7 @@ type TaskCardProps = BaseTaskCardProps & {
 
 function TaskCardBody({
   task,
+  hideDeadline = false,
   dragging,
 }: BaseTaskCardProps & { dragging?: boolean }) {
   const isOverdue = task.deadline
@@ -54,7 +56,7 @@ function TaskCardBody({
           </span>
         )}
 
-        {task.deadline && (
+        {!hideDeadline && task.deadline && (
           <span
             className={cn(
               "inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5",
@@ -74,7 +76,7 @@ function TaskCardBody({
   );
 }
 
-export function TaskCard({ task, onEdit }: TaskCardProps) {
+export function TaskCard({ task, hideDeadline, onEdit }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -108,15 +110,19 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       {...attributes}
       {...listeners}
     >
-      <TaskCardBody task={task} dragging={isDragging} />
+      <TaskCardBody
+        task={task}
+        hideDeadline={hideDeadline}
+        dragging={isDragging}
+      />
     </button>
   );
 }
 
-export function TaskCardPreview({ task }: BaseTaskCardProps) {
+export function TaskCardPreview({ task, hideDeadline }: BaseTaskCardProps) {
   return (
     <div className="w-80 max-w-[calc(100vw-3rem)] -rotate-2 cursor-grabbing rounded-lg border bg-background p-3 text-left shadow-lg ring-1 ring-primary/25">
-      <TaskCardBody task={task} dragging />
+      <TaskCardBody task={task} hideDeadline={hideDeadline} dragging />
     </div>
   );
 }

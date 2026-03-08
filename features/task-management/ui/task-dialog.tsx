@@ -38,6 +38,7 @@ type TaskDialogProps = {
   columns: Array<{
     id: string;
     name: string;
+    isCompleted: boolean;
   }>;
   defaultColumnId: string;
   open: boolean;
@@ -83,6 +84,11 @@ export function TaskDialog({
   const [columnId, setColumnId] = React.useState(defaultColumnId);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const selectedColumn = React.useMemo(
+    () => columns.find((column) => column.id === columnId),
+    [columnId, columns],
+  );
+  const shouldShowDeadline = !selectedColumn?.isCompleted;
 
   React.useEffect(() => {
     if (!open) {
@@ -97,6 +103,12 @@ export function TaskDialog({
     setError(null);
   }, [defaultColumnId, open, task]);
 
+  React.useEffect(() => {
+    if (!shouldShowDeadline && deadline) {
+      setDeadline("");
+    }
+  }, [deadline, shouldShowDeadline]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -104,7 +116,7 @@ export function TaskDialog({
       title,
       description,
       assigneeId,
-      deadline: toIso(deadline),
+      deadline: shouldShowDeadline ? toIso(deadline) : "",
       columnId,
     };
 
@@ -245,17 +257,19 @@ export function TaskDialog({
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="task-deadline" className="text-sm font-medium">
-              Дедлайн
-            </label>
-            <Input
-              id="task-deadline"
-              type="datetime-local"
-              value={deadline}
-              onChange={(event) => setDeadline(event.target.value)}
-            />
-          </div>
+          {shouldShowDeadline && (
+            <div className="space-y-1.5">
+              <label htmlFor="task-deadline" className="text-sm font-medium">
+                Дедлайн
+              </label>
+              <Input
+                id="task-deadline"
+                type="datetime-local"
+                value={deadline}
+                onChange={(event) => setDeadline(event.target.value)}
+              />
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

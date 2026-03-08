@@ -22,6 +22,7 @@ export function mapBoardColumns(
       id: column.id,
       name: column.name,
       color: column.color,
+      isCompleted: column.isCompleted,
       order: column.order,
       tasks: column.tasks
         .sort((a, b) => a.order - b.order)

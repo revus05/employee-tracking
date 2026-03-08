@@ -6,12 +6,16 @@ export const createColumnSchema = z.object({
     .string()
     .regex(/^[a-z-]+$/, "Неверный цвет")
     .optional(),
+  isCompleted: z.boolean().optional(),
 });
 
 export const updateColumnSchema = createColumnSchema
   .partial()
   .refine(
-    (value) => value.name !== undefined || value.color !== undefined,
+    (value) =>
+      value.name !== undefined ||
+      value.color !== undefined ||
+      value.isCompleted !== undefined,
     "Нужно изменить хотя бы одно поле",
   );
 

@@ -47,6 +47,7 @@ export async function POST(
       projectId,
       name: parsed.data.name,
       color: parsed.data.color ?? "slate",
+      isCompleted: parsed.data.isCompleted ?? false,
       order: (maxOrder._max.order ?? -1) + 1,
     },
   });
@@ -57,6 +58,7 @@ export async function POST(
         id: column.id,
         name: column.name,
         color: column.color,
+        isCompleted: column.isCompleted,
         order: column.order,
         tasks: [],
       },
