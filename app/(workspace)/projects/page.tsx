@@ -54,7 +54,7 @@ export default async function ProjectsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Проекты</h1>
         <p className="text-sm text-muted-foreground">
-          Jira-style доски для команд и delivery-циклов
+          Jira-style доски для команд и циклы разработки
         </p>
       </div>
 

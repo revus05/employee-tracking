@@ -123,8 +123,8 @@ export function RegisterForm() {
                 <SelectValue placeholder="Выберите роль" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="DEVELOPER">Developer</SelectItem>
-                <SelectItem value="MANAGER">Manager</SelectItem>
+                <SelectItem value="DEVELOPER">Разработчик</SelectItem>
+                <SelectItem value="MANAGER">Руководитель</SelectItem>
               </SelectContent>
             </Select>
           </div>

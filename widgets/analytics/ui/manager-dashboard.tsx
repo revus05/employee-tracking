@@ -4,6 +4,7 @@ import {
   AlertTriangleIcon,
   FlameIcon,
   LayoutPanelTopIcon,
+  UserIcon,
   UsersIcon,
 } from "lucide-react";
 import * as React from "react";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiClient, getErrorMessage } from "@/shared/api/client";
+import { getRoleLabel } from "@/shared/lib/role-labels";
 
 type DashboardData = {
   totals: {
@@ -40,6 +42,12 @@ type DashboardData = {
     assigneeId: string;
     name: string;
     count: number;
+  }>;
+  members: Array<{
+    id: string;
+    username: string;
+    email: string;
+    role: "MANAGER" | "DEVELOPER";
   }>;
 };
 
@@ -179,6 +187,42 @@ export function ManagerDashboard() {
                 <Badge variant="outline">{item.count}</Badge>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Участники</CardTitle>
+            <CardDescription>
+              Пользователи ваших проектов
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {data.members.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                Пока нет участников
+              </div>
+            ) : (
+              data.members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between rounded-md border bg-background/80 px-3 py-2 text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="size-4 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium">{member.username}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {member.email}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant="outline">
+                    {getRoleLabel(member.role)}
+                  </Badge>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 

@@ -5,16 +5,24 @@ import {
   LayoutPanelTopIcon,
   LogOutIcon,
   MailboxIcon,
+  UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { getRoleLabel } from "@/shared/lib/role-labels";
 import { ThemeToggle } from "@/shared/ui/theme-toggle";
 
 type AppShellProps = {
   user: {
+    id: string;
     username: string;
     role: "MANAGER" | "DEVELOPER";
   };
@@ -36,9 +44,9 @@ const navigation = [
   },
   {
     href: "/dashboard",
-    label: "Dashboard",
+    label: "Сводка",
     icon: LayoutPanelTopIcon,
-    managerOnly: true,
+    managerOnly: false,
   },
 ] as const;
 
@@ -68,7 +76,7 @@ export function AppShell({ user, children }: AppShellProps) {
               <div className="font-semibold tracking-tight">Taskboard Pro</div>
             </div>
             <Badge variant="secondary">
-              {user.role === "MANAGER" ? "Manager" : "Developer"}
+              {getRoleLabel(user.role)}
             </Badge>
           </div>
 
@@ -96,10 +104,30 @@ export function AppShell({ user, children }: AppShellProps) {
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="outline" onClick={handleLogout} className="gap-2">
-              <LogOutIcon className="size-4" />
-              Выйти
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <UserIcon className="size-4" />
+                  {user.username}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 space-y-2 p-2">
+                <Link href="/profile">
+                  <Button variant="ghost" className="w-full justify-start gap-2">
+                    <UserIcon className="size-4" />
+                    Профиль
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start gap-2 text-destructive"
+                >
+                  <LogOutIcon className="size-4" />
+                  Выйти
+                </Button>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </header>

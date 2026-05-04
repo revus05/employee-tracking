@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2Icon } from "lucide-react";
+import { SendHorizontalIcon, Trash2Icon } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import {
   createTaskSchema,
   updateTaskSchema,
 } from "@/entities/task/model/schemas";
-import type { BoardTask } from "@/entities/task/model/types";
+import type { BoardTask, TaskComment } from "@/entities/task/model/types";
 import { apiClient, getErrorMessage } from "@/shared/api/client";
 
 type TaskDialogProps = {
@@ -82,6 +82,9 @@ export function TaskDialog({
   const [assigneeId, setAssigneeId] = React.useState<string>("");
   const [deadline, setDeadline] = React.useState("");
   const [columnId, setColumnId] = React.useState(defaultColumnId);
+  const [comments, setComments] = React.useState<TaskComment[]>([]);
+  const [newComment, setNewComment] = React.useState("");
+  const [pendingComments, setPendingComments] = React.useState<string[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const selectedColumn = React.useMemo(
@@ -100,8 +103,19 @@ export function TaskDialog({
     setAssigneeId(task?.assigneeId ?? "");
     setDeadline(toDateTimeLocal(task?.deadline ?? null));
     setColumnId(task?.columnId ?? defaultColumnId);
+    setComments([]);
+    setNewComment("");
+    setPendingComments([]);
     setError(null);
-  }, [defaultColumnId, open, task]);
+
+    if (task) {
+      apiClient<{ comments: TaskComment[] }>(
+        `/api/projects/${projectId}/tasks/${task.id}/comments`,
+      )
+        .then((res) => setComments(res.comments))
+        .catch(() => {});
+    }
+  }, [defaultColumnId, open, projectId, task]);
 
   React.useEffect(() => {
     if (!shouldShowDeadline && deadline) {
@@ -145,6 +159,21 @@ export function TaskDialog({
         body: JSON.stringify(validation.data),
       });
 
+      const savedTaskId = response.task.id;
+
+      // Send pending comments for new tasks
+      if (!task && pendingComments.length > 0) {
+        for (const content of pendingComments) {
+          await apiClient(
+            `/api/projects/${projectId}/tasks/${savedTaskId}/comments`,
+            {
+              method: "POST",
+              body: JSON.stringify({ content }),
+            },
+          ).catch(() => {});
+        }
+      }
+
       onSaved(response.task);
       onOpenChange(false);
     } catch (err) {
@@ -180,9 +209,33 @@ export function TaskDialog({
     }
   }
 
+  async function handleSendComment() {
+    const content = newComment.trim();
+    if (!content) return;
+
+    if (task) {
+      try {
+        const res = await apiClient<{ comment: TaskComment }>(
+          `/api/projects/${projectId}/tasks/${task.id}/comments`,
+          {
+            method: "POST",
+            body: JSON.stringify({ content }),
+          },
+        );
+        setComments((prev) => [...prev, res.comment]);
+        setNewComment("");
+      } catch (err) {
+        toast.error(getErrorMessage(err, "Не удалось отправить комментарий"));
+      }
+    } else {
+      setPendingComments((prev) => [...prev, content]);
+      setNewComment("");
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {task ? "Редактировать задачу" : "Создать задачу"}
@@ -201,7 +254,7 @@ export function TaskDialog({
               id="task-title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Например: Подготовить API контракт"
+              placeholder="Исправить ошибки в документах"
             />
           </div>
 
@@ -270,6 +323,56 @@ export function TaskDialog({
               />
             </div>
           )}
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Комментарии</p>
+            {comments.length > 0 && (
+              <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-2">
+                {comments.map((c) => (
+                  <div key={c.id} className="space-y-0.5 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{c.authorName}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground">{c.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!task && pendingComments.length > 0 && (
+              <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-2">
+                {pendingComments.map((content, i) => (
+                  <div key={i} className="text-sm text-muted-foreground">
+                    {content}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Написать комментарий..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendComment();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={handleSendComment}
+                disabled={!newComment.trim()}
+              >
+                <SendHorizontalIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

@@ -19,6 +19,7 @@ export default async function WorkspaceLayout({
       id: session.userId,
     },
     select: {
+      id: true,
       username: true,
       role: true,
     },

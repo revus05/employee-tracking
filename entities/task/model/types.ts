@@ -1,3 +1,10 @@
+export type TaskComment = {
+  id: string;
+  content: string;
+  authorName: string;
+  createdAt: string;
+};
+
 export type BoardTask = {
   id: string;
   title: string;
@@ -8,4 +15,5 @@ export type BoardTask = {
   assigneeEmail: string | null;
   columnId: string;
   order: number;
+  comments?: TaskComment[];
 };

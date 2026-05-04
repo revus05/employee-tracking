@@ -88,7 +88,7 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
         <div className="space-y-1">
           <h3 className="text-sm font-semibold">Новый проект</h3>
           <p className="text-xs text-muted-foreground">
-            Название и короткое описание как в Jira-проектах
+            Название и короткое описание
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
             <Input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Например: Payment Platform"
+              placeholder="Разработка CMS-системы"
             />
           </div>
 
@@ -107,7 +107,7 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Что делает проект и какой scope"
+              placeholder="Мониторинг задач по проекту"
               className="min-h-20"
             />
           </div>

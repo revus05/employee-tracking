@@ -11,7 +11,7 @@ const PUBLIC_API_PATHS = [
   "/api/auth/register",
   "/api/auth/logout",
 ];
-const MANAGER_ONLY_PATHS = ["/dashboard", "/api/dashboard"];
+const MANAGER_ONLY_PATHS: string[] = [];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.includes(pathname);

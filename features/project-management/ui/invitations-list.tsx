@@ -110,12 +110,6 @@ export function InvitationsList() {
                 <XIcon className="size-4" />
                 Отклонить
               </Button>
-              <Link
-                href={`/projects/${item.projectId}`}
-                className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
-              >
-                Открыть проект
-              </Link>
             </CardContent>
           </Card>
         ))

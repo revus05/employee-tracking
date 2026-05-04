@@ -290,35 +290,6 @@ function ColumnEditPopover({
   );
 }
 
-function ProjectMembersCard({ members }: { members: Member[] }) {
-  return (
-    <div className="rounded-xl border bg-card/70 p-4">
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <UsersIcon className="size-4 text-muted-foreground" />
-        Команда проекта
-      </div>
-      <div className="mt-2 space-y-2 text-sm">
-        {members.map((member) => (
-          <div
-            key={member.id}
-            className="flex items-center justify-between rounded-md border bg-background/80 px-2 py-1.5"
-          >
-            <div>
-              <div className="font-medium">{member.username}</div>
-              <div className="text-xs text-muted-foreground">
-                {member.email}
-              </div>
-            </div>
-            <Badge variant="outline">
-              {member.role === "MANAGER" ? "Manager" : "Dev"}
-            </Badge>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 type SortableColumnProps = {
   column: BoardColumn;
   canManageColumns: boolean;
@@ -720,14 +691,7 @@ export function KanbanBoard({
 
   return (
     <section className="space-y-4">
-      <div
-        className={cn(
-          "grid gap-4",
-          canManageColumns
-            ? "xl:grid-cols-[1fr_auto]"
-            : "xl:grid-cols-[1fr_320px]",
-        )}
-      >
+      <div className="flex items-start justify-between gap-4">
         <div className="space-y-3">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
@@ -749,7 +713,7 @@ export function KanbanBoard({
           </div>
         </div>
 
-        {canManageColumns ? (
+        {canManageColumns && (
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline">
@@ -761,8 +725,6 @@ export function KanbanBoard({
               <InviteUserForm projectId={projectId} inPopover />
             </PopoverContent>
           </Popover>
-        ) : (
-          <ProjectMembersCard members={members} />
         )}
       </div>
 

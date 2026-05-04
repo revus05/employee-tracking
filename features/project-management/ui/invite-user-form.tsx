@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiClient, getErrorMessage } from "@/shared/api/client";
+import { getRoleLabel } from "@/shared/lib/role-labels";
 
 type SearchUser = {
   id: string;
@@ -135,7 +136,7 @@ export function InviteUserForm({
                 </div>
               </div>
               <Badge variant="outline">
-                {user.role === "MANAGER" ? "Manager" : "Dev"}
+                {getRoleLabel(user.role)}
               </Badge>
             </button>
           ))

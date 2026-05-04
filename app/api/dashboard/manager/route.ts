@@ -10,20 +10,20 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  if (auth.session.role !== "MANAGER") {
-    return jsonError("Forbidden", 403);
-  }
-
   const projectId = request.nextUrl.searchParams.get("projectId") || undefined;
 
+  const ownerOrMemberFilter =
+    auth.session.role === "MANAGER"
+      ? { ownerId: auth.session.userId }
+      : {
+          members: {
+            some: { userId: auth.session.userId },
+          },
+        };
+
   const whereClause = projectId
-    ? {
-        id: projectId,
-        ownerId: auth.session.userId,
-      }
-    : {
-        ownerId: auth.session.userId,
-      };
+    ? { id: projectId, ...ownerOrMemberFilter }
+    : ownerOrMemberFilter;
 
   const projects = await prisma.project.findMany({
     where: whereClause,
@@ -41,6 +41,26 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               username: true,
+            },
+          },
+        },
+      },
+      owner: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true,
+        },
+      },
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true,
             },
           },
         },
@@ -131,6 +151,33 @@ export async function GET(request: NextRequest) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const membersMap = new Map<
+    string,
+    { id: string; username: string; email: string; role: string }
+  >();
+  for (const project of projects) {
+    const owner = project.owner;
+    if (!membersMap.has(owner.id)) {
+      membersMap.set(owner.id, {
+        id: owner.id,
+        username: owner.username,
+        email: owner.email,
+        role: owner.role,
+      });
+    }
+    for (const member of project.members) {
+      if (!membersMap.has(member.user.id)) {
+        membersMap.set(member.user.id, {
+          id: member.user.id,
+          username: member.user.username,
+          email: member.user.email,
+          role: member.user.role,
+        });
+      }
+    }
+  }
+  const membersList = [...membersMap.values()];
+
   return jsonOk({
     totals: {
       projects: projects.length,
@@ -141,5 +188,6 @@ export async function GET(request: NextRequest) {
     tasksByColumn,
     assigneeDistribution,
     leaderboard,
+    members: membersList,
   });
 }
